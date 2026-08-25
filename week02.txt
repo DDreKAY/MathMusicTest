@@ -5,6 +5,9 @@ vi 에디터 소개
 일반모드,명령모드,편집(입력)모드드
 
 2교시
-git 명령어
+git 명령어 기초1
 status, init, add, config, commit, log, reset, checkout, branch, merge, conflict, switch
 
+3교시
+git 명령어 기초2
+branch checkout -b
