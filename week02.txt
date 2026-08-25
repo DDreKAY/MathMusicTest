@@ -11,3 +11,8 @@ status, init, add, config, commit, log, reset, checkout, branch, merge, conflict
 3교시
 git 명령어 기초2
 branch checkout -b
+
+git 명령어
+status, init, add, config, commit, log, reset, checkout
+
+3교시
