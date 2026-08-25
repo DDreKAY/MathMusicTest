@@ -13,5 +13,5 @@
 히트레이트
 
  4교시
-SOLID
+객체지향 SOLID
 개방 폐쇄의 원칙 (Open Closed Principal)
