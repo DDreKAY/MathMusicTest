@@ -6,5 +6,6 @@ vi 에디터 소개
 
 2교시
 git 명령어
-status, init, add, config, commit, log, reset, checkout, branch, merge, conflict, switch
+status, init, add, config, commit, log, reset, checkout
 
+3교시
