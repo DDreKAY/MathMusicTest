@@ -1,4 +1,5 @@
 1교시
+dev02`
 Linux 명령어 기초
 touch, ls, -a, ls, -l, ls -al, cat, rm
 vi 에디터 소개
