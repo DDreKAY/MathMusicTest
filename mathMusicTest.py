@@ -47,27 +47,28 @@ for key, value in files.items():
 # normalization
 fft_amplitudes={}
 for key, value in files.items():
-    fft_amplitudes[key]=np.abs(fft_vals[key]) * 2 / len(files[key]['time'])
+    fft_amplitudes[key]=np.abs(fft_vals[key]) * 2 / len(times[key])
 
 # cut off top N
-N = 1600
+N = 1600 # 1600
 cutoffs = {}
-filtered_fft = {}
 filtered_ffts = {}
+filtered_amplitudes = {}
 for key, value in fft_amplitudes.items():
     cutoffs[key]=np.partition(value,-N)[-N]
     filtered_ffts[key] = fft_vals[key].copy()
     filtered_ffts[key][value < cutoffs[key]] = 0
+    filtered_amplitudes[key] = np.abs(filtered_ffts[key]) * 2 / len(times[key])
 
-# filtered fft to graph
-filtered_amplitudes = {}
+# filtered fft to sound
+filtered_sounds = {}
 for key, value in filtered_ffts.items():
-    filtered_amplitudes[key] =np.fft.irfft(value,n=len(times[key]))
+    filtered_sounds[key] =np.fft.irfft(value,n=len(times[key]))
 
 # calculate similarity
 similarities = {}
 for key, value in files.items():
-    similarities[key] = np.dot(amplitudes[key],filtered_amplitudes[key])/(np.linalg.norm(filtered_amplitudes[key])*np.linalg.norm(amplitudes[key]))
+    similarities[key] = np.dot(amplitudes[key],filtered_sounds[key])/(np.linalg.norm(filtered_sounds[key])*np.linalg.norm(amplitudes[key]))
 
 def play(isOrigin, key):
     global sampling_rates
@@ -75,15 +76,56 @@ def play(isOrigin, key):
         original_indices = np.linspace(0, 1, len(amplitudes[key]))
         target_indices = np.linspace(0, 1, int(times[key].iloc[-1]*sampling_rates))
         extended_audio = np.interp(target_indices, original_indices, amplitudes[key])
-        sd.play(extended_audio, sampling_rates)
-        sd.wait()
-        return
     else:
-        original_indices = np.linspace(0,1,len(filtered_amplitudes[key]))
+        original_indices = np.linspace(0,1,len(filtered_sounds[key]))
         target_indices = np.linspace(0,1,int(times[key].iloc[-1]*sampling_rates))
-        extended_audio = np.interp(target_indices,original_indices,filtered_amplitudes[key])
-        sd.play(extended_audio,sampling_rates)
-        sd.wait()
-        return
-for key, value in files.items():
-    play(False, key)
+        extended_audio = np.interp(target_indices,original_indices,filtered_sounds[key])
+    sd.play(extended_audio,sampling_rates)
+    sd.wait()
+    return
+
+print("\n--- 1. 유사도 측정 결과 ---")
+for key, sim in similarities.items():
+    print(f"자음 '{key}': 유사도 = {sim:.4f}")
+
+print("\n--- 2. 음성을 재생합니다. ---")
+'''for key, value in files.items():
+    play(True, key)'''
+print("\n--- 2. 재생 완료 ---")
+
+n,m = 3,4
+line_width = 0.1
+
+# (key,isOrigin,isFFT)
+graphs = [('ga',True,False), ('ga',True,True), ('ba',True,False), ('ba',True,True),
+          ('gga',True,False), ('gga',True,True), ('bba',True,False), ('bba',True,True),
+          ('ka',True,False), ('ka',True,True), ('pa',True,False), ('pa',True,True)]
+print("\n--- 3. 그래프 그리기 ---")
+fig, axes = plt.subplots(n,m, figsize=(4*m,2*n))
+axes = axes.flatten()
+fig.suptitle('Graphs')
+print(type(freqs['ga']),type(fft_amplitudes['ga']))
+for idx, (key,isOrigin,isFFT) in enumerate(graphs):
+    if isOrigin:
+        if isFFT:
+            axes[idx].plot(freqs[key], fft_amplitudes[key], linewidth=line_width)
+            axes[idx].set_xlabel("Frequency (Hz)")
+            axes[idx].set_title(f"{key} Original FFT")
+        else:
+            axes[idx].plot(times[key],amplitudes[key],linewidth=line_width)
+            axes[idx].set_xlabel("Time (second)")
+            axes[idx].set_title(f"{key} Original Sound")
+    else:
+        if isFFT:
+            axes[idx].plot(freqs[key],filtered_amplitudes[key],linewidth=line_width)
+            axes[idx].set_xlabel("Frequency (Hz)")
+            axes[idx].set_title(f"{key} Filtered FFT")
+        else:
+            axes[idx].plot(times[key], filtered_sounds[key], linewidth=line_width)
+            axes[idx].set_xlabel("Time (second)")
+            axes[idx].set_title(f"{key} Filtered Sound")
+    axes[idx].set_ylabel("Amplitude")
+    axes[idx].grid(True)
+
+plt.tight_layout()
+plt.show()
