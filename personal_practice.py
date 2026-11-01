@@ -62,7 +62,7 @@ plt.tight_layout()
 plt.show()
 
 # 5. 진폭 상위 n개 선정
-n=100 #1599
+n=1599 #1599
 
 amplitudes1 = np.abs(fft_val1)
 cutoff1 = np.sort(amplitudes1)[::-1][n]

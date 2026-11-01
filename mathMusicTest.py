@@ -3,8 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sounddevice as sd
 
-from personal_practice import original_indices, extended_audio
-
 # consonants name and txt file position dictionary
 consonants = {
     '가': ('ga', 'korean/ga.txt'),
@@ -74,12 +72,18 @@ for key, value in files.items():
 def play(isOrigin, key):
     global sampling_rates
     if isOrigin:
-        sd.play(amplitudes[key], sampling_rates)
+        original_indices = np.linspace(0, 1, len(amplitudes[key]))
+        target_indices = np.linspace(0, 1, int(times[key].iloc[-1]*sampling_rates))
+        extended_audio = np.interp(target_indices, original_indices, amplitudes[key])
+        sd.play(extended_audio, sampling_rates)
         sd.wait()
         return
     else:
         original_indices = np.linspace(0,1,len(filtered_amplitudes[key]))
-        target_indices = np.linspace(0,1,len(amplitudes[key]))
+        target_indices = np.linspace(0,1,int(times[key].iloc[-1]*sampling_rates))
         extended_audio = np.interp(target_indices,original_indices,filtered_amplitudes[key])
         sd.play(extended_audio,sampling_rates)
         sd.wait()
+        return
+for key, value in files.items():
+    play(False, key)
