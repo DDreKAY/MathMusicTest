@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import sounddevice as sd
 
-df = pd.read_csv('na.txt', sep=r'\s+', engine='python')
+df = pd.read_csv('korean/jja.txt', sep=r'\s+', engine='python')
 print(df.info())
 
 plt.plot(df['time'],df['amplitude'],linewidth=0.1)
@@ -29,7 +29,7 @@ plt.grid(True)
 plt.show()
 
 amplitudes = np.abs(fft_val)
-cutoff = np.sort(amplitudes)[::-1][799]
+cutoff = np.sort(amplitudes)[::-1][1599]
 filtered_fft = fft_val.copy()
 filtered_fft[amplitudes < cutoff] = 0
 
