@@ -23,7 +23,8 @@ consonants = {
     '따': ('dda', 'korean/dda.txt'),
     '빠': ('bba', 'korean/bba.txt'),
     '싸': ('ssa', 'korean/ssa.txt'),
-    '짜': ('jja', 'korean/jja.txt')
+    '짜': ('jja', 'korean/jja.txt'),
+    ' ': ('blank', 'korean/blank.txt')
 }
 
 # read files
@@ -50,7 +51,7 @@ for key, value in files.items():
     fft_amplitudes[key]=np.abs(fft_vals[key]) * 2 / len(times[key])
 
 # cut off top N
-N = 1600 # 1600
+N = 100 # 1600
 cutoffs = {}
 filtered_ffts = {}
 filtered_amplitudes = {}
@@ -93,13 +94,13 @@ print("\n--- 2. 음성을 재생합니다. ---")
     play(True, key)'''
 print("\n--- 2. 재생 완료 ---")
 
-n,m = 3,4
+n,m = 3,5
 line_width = 0.1
 
 # (key,isOrigin,isFFT)
-graphs = [('ga',True,False), ('ga',True,True), ('ba',True,False), ('ba',True,True),
-          ('gga',True,False), ('gga',True,True), ('bba',True,False), ('bba',True,True),
-          ('ka',True,False), ('ka',True,True), ('pa',True,False), ('pa',True,True)]
+graphs = [('ba',False,True), ('da',False,True), ('blank',False,True), ('ga',False,True), ('blank',False,True),
+          ('bba',False,True), ('dda',False,True), ('blank',False,True), ('gga',False,True), ('blank',False,True),
+          ('pa',False,True), ('ta',False,True), ('blank',False,True), ('ka',False,True), ('blank',False,True),]
 print("\n--- 3. 그래프 그리기 ---")
 fig, axes = plt.subplots(n,m, figsize=(4*m,2*n))
 axes = axes.flatten()
