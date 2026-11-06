@@ -94,39 +94,65 @@ print("\n--- 2. 음성을 재생합니다. ---")
     play(True, key)'''
 print("\n--- 2. 재생 완료 ---")
 
-n,m = 3,5
+n,m = 7,5
 line_width = 0.1
 
 # (key,isOrigin,isFFT)
 graphs = [('ba',False,True), ('da',False,True), ('blank',False,True), ('ga',False,True), ('blank',False,True),
-          ('bba',False,True), ('dda',False,True), ('blank',False,True), ('gga',False,True), ('blank',False,True),
-          ('pa',False,True), ('ta',False,True), ('blank',False,True), ('ka',False,True), ('blank',False,True),]
+          ('pa',False,True), ('ta',False,True), ('blank',False,True), ('ka',False,True), ('blank',False,True),
+          ('blank',False,True), ('blank',False,True), ('ja',False,True), ('blank',False,True), ('blank',False,True),
+          ('blank',False,True), ('blank',False,True), ('cha',False,True), ('blank',False,True), ('blank',False,True),
+          ('blank',False,True), ('sa',False,True), ('blank',False,True), ('blank',False,True), ('ha',False,True),
+          ('ma',False,True), ('na',False,True), ('blank',False,True), ('aa',False,True), ('blank',False,True),
+          ('blank',False,True), ('la',False,True), ('blank',False,True), ('blank',False,True), ('blank',False,True)]
 print("\n--- 3. 그래프 그리기 ---")
-fig, axes = plt.subplots(n,m, figsize=(4*m,2*n))
+'''
+fig, axes = plt.subplots(n,m, figsize=(2*m,1*n))
 axes = axes.flatten()
-fig.suptitle('Graphs')
-print(type(freqs['ga']),type(fft_amplitudes['ga']))
+#fig.suptitle('Graphs')
 for idx, (key,isOrigin,isFFT) in enumerate(graphs):
     if isOrigin:
         if isFFT:
             axes[idx].plot(freqs[key], fft_amplitudes[key], linewidth=line_width)
-            axes[idx].set_xlabel("Frequency (Hz)")
-            axes[idx].set_title(f"{key} Original FFT")
+            #axes[idx].set_xlabel("Frequency (Hz)")
+            #axes[idx].set_title(f"{key} Original FFT")
         else:
             axes[idx].plot(times[key],amplitudes[key],linewidth=line_width)
-            axes[idx].set_xlabel("Time (second)")
-            axes[idx].set_title(f"{key} Original Sound")
+            #axes[idx].set_xlabel("Time (second)")
+            #axes[idx].set_title(f"{key} Original Sound")
     else:
         if isFFT:
             axes[idx].plot(freqs[key],filtered_amplitudes[key],linewidth=line_width)
-            axes[idx].set_xlabel("Frequency (Hz)")
-            axes[idx].set_title(f"{key} Filtered FFT")
+            #axes[idx].set_xlabel("Frequency (Hz)")
+            #axes[idx].set_title(f"{key} Filtered FFT")
         else:
             axes[idx].plot(times[key], filtered_sounds[key], linewidth=line_width)
-            axes[idx].set_xlabel("Time (second)")
-            axes[idx].set_title(f"{key} Filtered Sound")
-    axes[idx].set_ylabel("Amplitude")
+            #axes[idx].set_xlabel("Time (second)")
+            #axes[idx].set_title(f"{key} Filtered Sound")
+    #axes[idx].set_ylabel("Amplitude")
     axes[idx].grid(True)
+'''
+# consonants bundle
+consonants_bundle = {
+    'Voiced':('ma','na','la','aa'),
+    'Voiceless':('ba','da','sa','ja','ga','bba','dda','ssa','jja','gga','pa','ta','cha','ka','ha'),
 
-plt.tight_layout()
-plt.show()
+    'Plosive':('ba','da','ga','pa','ta','ka','bba','dda','gga'),
+    'Affricate':('ja','jja','cha'),
+    'Fricative':('sa','ha','ssa'),
+    'Liquid':('la',),
+    'Nasal':('ma','na','aa'),
+
+    'Bilabial':('ba','bba','pa','ma'),
+    'Alveolar':('da','dda','ta','sa','ssa','na','la'),
+    'Palatal':('ja','jja','cha'),
+    'Velar':('ga','gga','ka','aa'),
+    'Glottal':('ha',),
+
+    'Plain':('ba','da','sa','ja','ga','ha'),
+    'Fortis':('gga','dda','bba','ssa','jja'),
+    'Aspirated':('ka','ta','pa','cha')
+}
+
+#plt.tight_layout()
+#plt.show()
