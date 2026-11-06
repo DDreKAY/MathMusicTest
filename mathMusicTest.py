@@ -1,3 +1,5 @@
+from statistics import mean
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -47,19 +49,24 @@ for key, value in files.items():
 
 # normalization
 fft_amplitudes={}
+fft_db={}
+A_ref = 1.0
 for key, value in files.items():
     fft_amplitudes[key]=np.abs(fft_vals[key]) * 2 / len(times[key])
+    fft_db[key]=20*np.log10((fft_amplitudes[key]/A_ref) + 1e-10)
 
 # cut off top N
-N = 100 # 1600
+N = 1600 # 1600
 cutoffs = {}
 filtered_ffts = {}
 filtered_amplitudes = {}
+filtered_db = {}
 for key, value in fft_amplitudes.items():
     cutoffs[key]=np.partition(value,-N)[-N]
     filtered_ffts[key] = fft_vals[key].copy()
     filtered_ffts[key][value < cutoffs[key]] = 0
     filtered_amplitudes[key] = np.abs(filtered_ffts[key]) * 2 / len(times[key])
+    filtered_db[key] = 20*np.log10((filtered_amplitudes[key]/A_ref) + 1e-10)
 
 # filtered fft to sound
 filtered_sounds = {}
@@ -94,44 +101,52 @@ print("\n--- 2. 음성을 재생합니다. ---")
     play(True, key)'''
 print("\n--- 2. 재생 완료 ---")
 
-n,m = 7,5
+n,m = 2,2
 line_width = 0.1
 
 # (key,isOrigin,isFFT)
-graphs = [('ba',False,True), ('da',False,True), ('blank',False,True), ('ga',False,True), ('blank',False,True),
+'''graphs = [('ba',False,True), ('da',False,True), ('blank',False,True), ('ga',False,True), ('blank',False,True),
           ('pa',False,True), ('ta',False,True), ('blank',False,True), ('ka',False,True), ('blank',False,True),
           ('blank',False,True), ('blank',False,True), ('ja',False,True), ('blank',False,True), ('blank',False,True),
           ('blank',False,True), ('blank',False,True), ('cha',False,True), ('blank',False,True), ('blank',False,True),
           ('blank',False,True), ('sa',False,True), ('blank',False,True), ('blank',False,True), ('ha',False,True),
           ('ma',False,True), ('na',False,True), ('blank',False,True), ('aa',False,True), ('blank',False,True),
-          ('blank',False,True), ('la',False,True), ('blank',False,True), ('blank',False,True), ('blank',False,True)]
+          ('blank',False,True), ('la',False,True), ('blank',False,True), ('blank',False,True), ('blank',False,True)]'''
+graphs = [('ba',True,False), ('ba',True,True),
+          ('ba',False,False), ('ba',False,True)]
 print("\n--- 3. 그래프 그리기 ---")
-'''
-fig, axes = plt.subplots(n,m, figsize=(2*m,1*n))
+
+fig, axes = plt.subplots(n,m, figsize=(4*m,2*n))
 axes = axes.flatten()
-#fig.suptitle('Graphs')
+fig.suptitle('Graphs')
 for idx, (key,isOrigin,isFFT) in enumerate(graphs):
     if isOrigin:
         if isFFT:
-            axes[idx].plot(freqs[key], fft_amplitudes[key], linewidth=line_width)
-            #axes[idx].set_xlabel("Frequency (Hz)")
-            #axes[idx].set_title(f"{key} Original FFT")
+            axes[idx].plot(freqs[key], fft_db[key], linewidth=line_width)
+            axes[idx].set_xlabel("Frequency (Hz)")
+            axes[idx].set_title(f"{key} Original FFT")
+            axes[idx].set_ylabel("dB")
         else:
             axes[idx].plot(times[key],amplitudes[key],linewidth=line_width)
-            #axes[idx].set_xlabel("Time (second)")
-            #axes[idx].set_title(f"{key} Original Sound")
+            axes[idx].set_xlabel("Time (second)")
+            axes[idx].set_title(f"{key} Original Sound")
+            axes[idx].set_ylabel("Amplitude")
     else:
         if isFFT:
-            axes[idx].plot(freqs[key],filtered_amplitudes[key],linewidth=line_width)
-            #axes[idx].set_xlabel("Frequency (Hz)")
-            #axes[idx].set_title(f"{key} Filtered FFT")
+            axes[idx].plot(freqs[key],filtered_db[key],linewidth=line_width)
+            axes[idx].set_xlabel("Frequency (Hz)")
+            axes[idx].set_title(f"{key} Filtered FFT")
+            axes[idx].set_ylabel("dB")
         else:
             axes[idx].plot(times[key], filtered_sounds[key], linewidth=line_width)
-            #axes[idx].set_xlabel("Time (second)")
-            #axes[idx].set_title(f"{key} Filtered Sound")
-    #axes[idx].set_ylabel("Amplitude")
+            axes[idx].set_xlabel("Time (second)")
+            axes[idx].set_title(f"{key} Filtered Sound")
+            axes[idx].set_ylabel("Amplitude")
     axes[idx].grid(True)
-'''
+
+plt.tight_layout()
+plt.show()
+
 # consonants bundle
 consonants_bundle = {
     'Voiced':('ma','na','la','aa'),
@@ -154,5 +169,3 @@ consonants_bundle = {
     'Aspirated':('ka','ta','pa','cha')
 }
 
-#plt.tight_layout()
-#plt.show()
