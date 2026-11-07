@@ -56,7 +56,7 @@ for key, value in files.items():
     fft_db[key]=20*np.log10((fft_amplitudes[key]/A_ref) + 1e-10)
 
 # cut off top N
-N = 100
+N = 2000
 cutoffs = {}
 filtered_ffts = {}
 filtered_amplitudes = {}
@@ -121,10 +121,10 @@ for idx, (key, sim) in enumerate(similarities.items()):
     print(f"{list(consonants.keys())[idx]}: {sim:.4f}")
 
 # 무음을 제외한 모든 자음 음원을 WAV 파일로 자동 저장
-print("\n--- 2. 음원 파일 저장 중 ---")
+'''print("\n--- 2. 음원 파일 저장 중 ---")
 for key in filtered_sounds.keys():
     if key != 'blank':
-        save_filtered_audio_to_wav(key, filename=f"{key}_filtered.wav")
+        save_filtered_audio_to_wav(key, filename=f"N=2000{key}_filtered.wav")'''
 
 n,m = 4,5
 width = 0.1
@@ -249,8 +249,29 @@ consonants_bundle = {
     'Aspirated':('ka','ta','pa','cha')
 }
 
-'''# 1. '가' 소리의 진폭을 절반으로 줄이고 그래프 시각화 및 재생
+
+def save_audio_array_to_wav(audio_array, duration, filename="output.wav", sampling_rate=48000):
+    # 시간 축 길이에 맞춰 보간(Interpolation) 수행
+    original_indices = np.linspace(0, 1, len(audio_array))
+    target_indices = np.linspace(0, 1, int(duration * sampling_rate))
+    extended_audio = np.interp(target_indices, original_indices, audio_array)
+
+    # -1.0 ~ 1.0 범위를 16비트 PCM 정수형(-32768 ~ 32767)으로 변환
+    audio_data = np.clip(extended_audio, -1.0, 1.0)
+    audio_int16 = (audio_data * 32767).astype(np.int16)
+
+    # wave 모듈을 이용해 파일 저장
+    with wave.open(filename, 'w') as wf:
+        wf.setnchannels(1)  # 모노 채널
+        wf.setsampwidth(2)  # 16-bit (2 bytes)
+        wf.setframerate(sampling_rate)
+        wf.writeframes(audio_int16.tobytes())
+
+    print(f"음원이 '{filename}' 파일로 저장되었습니다.")
+
+# 1. '가' 소리의 진폭을 절반으로 줄이고 그래프 시각화 및 재생
 half_amplitude = amplitudes['ga'] * 0.5
+save_audio_array_to_wav(half_amplitude, duration=times['ga'].iloc[-1], filename=f"half_ga.wav")
 
 plt.figure(figsize=(10, 3))
 plt.plot(times['ga'], half_amplitude, linewidth=width)
@@ -282,6 +303,7 @@ def modify_frequency_scale(fft_val, scale):
 # 2-1. '가' 소리 주파수 2배 변환 및 재생/시각화
 fft_double = modify_frequency_scale(fft_vals['ga'], 2.0)
 sound_double = np.fft.irfft(fft_double, n=len(times['ga']))
+save_audio_array_to_wav(sound_double, duration=times['ga'].iloc[-1]*2, filename=f"double_freq_ga.wav")
 
 plt.figure(figsize=(10, 3))
 plt.plot(times['ga'], sound_double, linewidth=width)
@@ -304,6 +326,9 @@ sd.wait()
 fft_half = modify_frequency_scale(fft_vals['ga'], 0.5)
 sound_half = np.fft.irfft(fft_half, n=len(times['ga']))
 
+save_audio_array_to_wav(sound_half,duration=times['ga'].iloc[-1]/2, filename=f"half_freq_ga.wav")
+
+
 plt.figure(figsize=(10, 3))
 plt.plot(times['ga'], sound_half, linewidth=width)
 plt.title("'가' Frequency Halved Sound (x0.5)")
@@ -318,10 +343,10 @@ extended_audio_half = np.interp(
     sound_half
 )
 sd.play(extended_audio_half, sampling_rates)
-sd.wait()'''
+sd.wait()
 
 
-'''# 가장 큰 진폭을 가지는 주파수 성분 주위의 성분들까지 함께 위상차를 옮겨주는 반복문 ('q' 입력 시 종료)
+# 가장 큰 진폭을 가지는 주파수 성분 주위의 성분들까지 함께 위상차를 옮겨주는 반복문 ('q' 입력 시 종료)
 ga_fft = fft_vals['ga'].copy()
 max_idx = np.argmax(np.abs(ga_fft))
 
@@ -368,4 +393,5 @@ while True:
         sound_phase_shifted
     )
     sd.play(extended_audio_phase, sampling_rates)
-    sd.wait()'''
+    sd.wait()
+    save_audio_array_to_wav(sound_phase_shifted, duration=times['ga'].iloc[-1],filename=f"phase_ga.wav")
